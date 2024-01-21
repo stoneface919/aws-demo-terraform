@@ -22,6 +22,7 @@ variable "avail_zone" {}
 variable "env_prefix" {}
 variable "my_ip" {}
 variable "instance_type" {}
+variable "key_pub" {}
 
 # CREATE VPC
 resource "aws_vpc" "app01_vpc" {
@@ -128,18 +129,23 @@ resource "aws_instance" "app01-server" {
     subnet_id = aws_subnet.app01-subnet.id
     availability_zone = var.avail_zone
     associate_public_ip_address = true
-    key_name = "ec2-tutanota"
-    
+    key_name = aws_key_pair.app01-keypair.key_name
+    user_data_base64 = "IyFiaW4vYmFzaAp5dW0gdXBkYXRlIC15ICYmIHl1bSBpbnN0YWxsIC15IGRvY2tlcgpzeXN0ZW1jdGwgc3RhcnQgZG9ja2VyCnVzZXJtb2QgLWFHIGRvY2tlciBlYzItdXNlcgpkb2NrZXIgcnVuIC1wIDgwODA6ODAgbmdpbng="
+
 }
 
 
+# CREATE KEY PAIR
+resource "aws_key_pair" "app01-keypair" {
+  key_name = "app01-server-key"
+  public_key = var.key_pub
+}
 
 
-
-output "amazon-linux-latest" {
-    value = data.aws_ami.latest-amazon-linux-image
+# output "amazon-linux-latest" {
+#     value = data.aws_ami.latest-amazon-linux-image
   
-}
+# }
 
 # DEPLOY EC2 INSTANCE WITH A DOCKER CONTAINER
 
