@@ -27,7 +27,7 @@ variable "key_pub" {}
 # CREATE VPC
 resource "aws_vpc" "app01_vpc" {
     cidr_block = var.cidr_blocks_aws[0].cidr_block
-    tags = {
+    tags ={
       Name: "${var.env_prefix}-${var.cidr_blocks_aws[0].name}"
     } 
 }
@@ -131,7 +131,9 @@ resource "aws_instance" "app01-server" {
     associate_public_ip_address = true
     key_name = aws_key_pair.app01-keypair.key_name
     user_data_base64 = "IyFiaW4vYmFzaAp5dW0gdXBkYXRlIC15ICYmIHl1bSBpbnN0YWxsIC15IGRvY2tlcgpzeXN0ZW1jdGwgc3RhcnQgZG9ja2VyCnVzZXJtb2QgLWFHIGRvY2tlciBlYzItdXNlcgpkb2NrZXIgcnVuIC1wIDgwODA6ODAgbmdpbng="
-
+    metadata_options {
+     
+    }
 }
 
 
