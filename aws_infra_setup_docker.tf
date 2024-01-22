@@ -23,7 +23,7 @@ variable "env_prefix" {}
 variable "my_ip" {}
 variable "instance_type" {}
 variable "key_pub" {}
-
+variable "private_key_location" {}
 # CREATE VPC
 resource "aws_vpc" "app02_vpc" {
     cidr_block = var.cidr_blocks_aws[0].cidr_block
@@ -130,10 +130,35 @@ resource "aws_instance" "app02-server" {
     availability_zone = var.avail_zone
     associate_public_ip_address = true
     key_name = aws_key_pair.app02-keypair.key_name
-    user_data_base64 = "IyFiaW4vYmFzaAp5dW0gdXBkYXRlIC15ICYmIHl1bSBpbnN0YWxsIC15IGRvY2tlcgpzeXN0ZW1jdGwgc3RhcnQgZG9ja2VyCnVzZXJtb2QgLWFHIGRvY2tlciBlYzItdXNlcgpkb2NrZXIgcnVuIC1wIDgwODA6ODAgbmdpbng="
-    metadata_options {
-     
+    //user_data_base64 = "IyFiaW4vYmFzaAp5dW0gdXBkYXRlIC15ICYmIHl1bSBpbnN0YWxsIC15IGRvY2tlcgpzeXN0ZW1jdGwgc3RhcnQgZG9ja2VyCnVzZXJtb2QgLWFHIGRvY2tlciBlYzItdXNlcgpkb2NrZXIgcnVuIC1wIDgwODA6ODAgbmdpbng="
+    
+    //START SSH CONNECTION
+    connection {
+      type = "ssh"
+      host = self.public_ip
+      user = "ec2-user"
+      private_key = file(var.private_key_location)
     }
+    // COMMANDS TO EXECUTE
+    provisioner "remote-exec" {
+      # inline = [ 
+      #   "export ENV=dev",
+      #   "mkdir provisioner-dir"
+      #  ] 
+      script = file("entry-script.sh")     
+    }
+
+    provisioner "file" {
+      source = "entry-script.sh"
+      destination = "/home/ec2-user"
+    }
+
+    provisioner "local-exec" {
+      command = "echo ${self.public_ip}"
+      
+    }
+    
+    metadata_options {}
 }
 
 
@@ -151,3 +176,36 @@ resource "aws_key_pair" "app02-keypair" {
 
 # DEPLOY EC2 INSTANCE WITH A DOCKER CONTAINER
 
+
+
+
+
+
+
+output "text" {
+
+  value = "Deployment details:\n\n"
+  
+}
+
+output "ec2_ip" {
+  value = aws_instance.app02-server.public_ip
+}
+output "vpc" {
+  value = aws_vpc.app02_vpc.id
+}
+output "subnet" {
+  value = aws_subnet.app02-subnet.id
+}
+output "ec2-instance" {
+  value = aws_instance.app02-server.id
+}
+output "ec2-sg" {
+  value = aws_security_group.app02-sg.id
+}
+output "vpc-igw" {
+  value = aws_internet_gateway.app02-internet_gateway.id
+}
+output "vpc_rt" {
+  value = aws_route_table.app02-route_table.id
+}
